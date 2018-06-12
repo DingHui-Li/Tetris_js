@@ -1,0 +1,385 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/base.css" rel="stylesheet"><!--//滑块-->
+    <link href="dist/srs.css" rel="stylesheet">
+    <script src="dist/jquery.js"></script>
+    <script src="dist/srs.js"></script>
+    <link rel="stylesheet" href="css/normalize.min.css"><!--//确定按钮-->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style1.css"><!--//开始/暂停按钮-->
+    <link rel="stylesheet" href="css/style2.css"><!--//开关按钮-->
+    <script>
+        var rows=20;//行数
+        var cols=20;//列数
+        var actShape;//当前图形
+        var allCell;//所有单元格的状态
+        var timer;//定时器
+        var fallingSpeed=800;//下移速度
+        var score=0;//分数
+        var grid=false;//网格
+        var color=shapeColor();
+        window.onload=function () {
+            document.getElementById('score').innerHTML=score;
+            creteMainTb()
+            choiceSize();
+            actShape=createShape();
+            start();
+
+        }
+
+        document.onkeydown=function (e) {
+            clearInterval(timer);
+            if (e.keyCode===37){
+                if (checkLeft()) {
+                    wipe();
+                    for (var i=0;i<4;i++){
+                        actShape[i].y--;
+                    }
+                    draw();
+                }
+                moveDown();
+            }
+            else if (e.keyCode===39){
+                if (checkRight() ) {
+                    wipe();
+                    for (var i=0;i<4;i++){
+                        actShape[i].y++;
+                    }
+                    draw();
+                }
+                moveDown();
+            }
+            else if (e.keyCode===38) {
+                rotate();
+                moveDown();
+            }
+            else if (e.keyCode===40){
+                fallingSpeed=50;
+                moveDown();
+            }
+
+        }
+        document.onkeyup=function (e) {
+            if (e.keyCode===40){
+                clearInterval(timer);
+                fallingSpeed=1000;
+                moveDown();
+            }
+        }
+        function start() {
+
+                var yes=document.getElementById('yes');
+                var no=document.getElementById('no');
+                yes.onclick=function () {
+                    fallingSpeed=800;
+                    moveDown();
+                }
+                no.onclick=function () {
+                    clearInterval(timer);
+                }
+                var check=document.getElementById('dn');
+                check.onclick=function () {
+                    if (check.checked){
+                        grid = true;creteMainTb();
+                    }else {
+                        grid = false;creteMainTb();
+                    }
+                }
+            // var button2=document.getElementById('button2')
+            // var button3=document.getElementById('button3')
+            // button2.onclick=function () {//开始
+            //     moveDown();
+            // }
+            // button3.onclick=function () {//暂停
+            //     clearInterval(timer);
+            // }
+        }
+        function creteMainTb() {//创建mainTb
+            allCell=new Array(rows);
+            for (var i=0;i<rows;i++){
+                allCell[i]=new Array(cols);
+            }
+            var mainBoard=document.getElementById('mainBoard')
+            var tb =document.getElementById('mainTb')//若mainTb存在则删除
+            if (tb) {
+                mainBoard.removeChild(tb)
+            }
+            var tb=document.createElement('table')//新创建table
+            tb.setAttribute('id','mainTb')
+            mainBoard.appendChild(tb)
+           tb.style="border-collapse: collapse;border:2px solid;position: relative;margin-left:auto; margin-right:auto;color:white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
+            for (var i=0;i<rows ;i++) {
+                var tr=document.createElement('tr');
+                tb.appendChild(tr);
+                tr.width='20px'
+                tr.height='20px'
+                for (var j=0;j<cols;j++) {
+                    var td=document.createElement('td');
+                    if (grid) td.style="border:1px solid;";
+                    td.width='20px'
+                    td.height='20px'
+                    tr.appendChild(td);
+                }
+            }
+        }
+        function choiceSize() {//选择mainTb行数和列数
+            // var button=document.getElementById('button1')
+            // button.onclick=function () {
+            // }
+            gameOver();
+            var r=document.getElementById('example-1').value;
+            var c=document.getElementById('example-2').value;
+            if (r>=10&&c>=10) {
+                rows=r;cols=c;creteMainTb();
+            }
+        }
+        function eliminate() {//消除
+            var mainTb=document.getElementById('mainTb')
+            var flag=true;
+            var lines=new Array();
+            for (var i=0;i<rows;i++){
+                flag = true;
+                for(var j=0;j<cols;j++){
+                    if (allCell[i][j]!=1) flag = false;
+                }
+                if (flag) {
+                    lines.push(i);
+                    for(var j=0;j<cols;j++){
+                        allCell[i][j]=0;
+                    }
+                }
+           }
+           if (lines.length>0) {
+               score += lines.length * 5;
+               document.getElementById('score').innerHTML = score;
+               for (var k = 0; k < lines.length; k++) {//下移
+                   for (var i = lines[k]; i >= 0; i--) {
+                       for (var j = 0; j < cols; j++) {
+                           if (allCell[i][j] == 1) {
+                               if (i < rows) {
+                                   allCell[i][j] = 0;
+                                   allCell[i + 1][j] = 1;
+                               }
+                           }
+                       }
+                   }
+               }
+
+               for (var i = 0; i < rows; i++) {//清空
+                   for (var j = 0; j < cols; j++) {
+                       mainTb.rows[i].cells[j].style.backgroundColor = null;
+                   }
+               }
+               for (var i = 0; i < rows; i++) {//重绘
+                   for (var j = 0; j < cols; j++) {
+                       if (allCell[i][j] == 1) mainTb.rows[i].cells[j].style.backgroundColor = color;
+                   }
+               }
+           }
+        }
+        function rotate() {//旋转
+            var temp =new Array(4);
+            for (var i=0;i<4;i++){
+                temp[i]={x:actShape[i].x,y:actShape[i].y};
+            }
+            var cx = Math.round((temp[0].x + temp[1].x + temp[2].x + temp[3].x)/4);
+            var cy = Math.round((temp[0].y + temp[1].y + temp[2].y + temp[3].y)/4);
+            for(var i=0; i<4; i++){
+                temp[i].x = cx+cy-actShape[i].y;
+                temp[i].y = cy-cx+actShape[i].x;
+            }
+             if (judge(temp)){
+                wipe();
+                 for(var i=0; i<4; i++){
+                     actShape[i].x = temp[i].x;
+                     actShape[i].y = temp[i].y;
+                 }
+             draw();
+            }
+        }
+        function judge(temp) {
+            for(var i=0; i<4; i++){
+                if (temp[i].x>=mainTb.rows.length-1) return false;
+                else if (temp[i].y<=0) return false;
+                else if (temp[i].y+1>=mainTb.rows[0].cells.length) return false;
+            }
+            return true;
+        }
+        function moveDown() {
+                var mainTb=document.getElementById('mainTb')
+               timer = setInterval(function () {
+                   if (checkBottom()){
+                       wipe();
+                       for (var j=0;j<actShape.length;j++){
+                           actShape[j].x++;
+                       }
+                       draw();
+                   }
+                   else  {
+                       for (var j=0;j<actShape.length;j++) {
+                            allCell[actShape[j].x][actShape[j].y]=1;
+                       }
+                       eliminate();
+                       actShape=createShape();
+                       color=shapeColor();
+                       for (var i=0;i<4;i++){
+                           if (allCell[actShape[i].x][actShape[i].y]===1) {
+                               gameOver(); alert('game over'); break;
+                           }
+                       }
+                   }
+                },fallingSpeed)
+        }
+        function gameOver() {
+            var mainTb=document.getElementById('mainTb')
+            clearInterval(timer);
+            for (var i = 0; i < rows; i++) {
+                for (var j = 0; j < cols; j++){
+                    allCell[i][j]=0;
+                    mainTb.rows[i].cells[j].style.backgroundColor=null;
+                    score = 0;
+                    }
+            }
+
+        }
+        function checkBottom() {//检查下边距
+            var mainTb=document.getElementById('mainTb')
+            for (var i=0;i<4;i++ ) {
+                if (actShape[i].x>=mainTb.rows.length-1) return false;
+                if (allCell[actShape[i].x+1][actShape[i].y]===1)return false;
+            }
+            return true;
+        }
+        function checkLeft() {//检查左边距
+            for (var i=0;i<4;i++ ) {
+                if (actShape[i].y<=0) return false;
+                if (allCell[actShape[i].x][actShape[i].y-1]===1)return false;
+            }
+            return true;
+        }
+        function checkRight() {//检查右边距
+            var mainTb=document.getElementById('mainTb');
+            for (var i=0;i<4;i++ ) {
+                if (actShape[i].y+1>=mainTb.rows[0].cells.length) return false;
+                if (allCell[actShape[i].x][actShape[i].y+1]===1)return false;
+            }
+            return true;
+        }
+        function draw() {//绘制图形
+            var mainTb=document.getElementById('mainTb')
+            for (var i=0;i<4;i++) {
+                mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=color;
+            }
+        }
+        function wipe() {//擦除图形
+            var mainTb=document.getElementById('mainTb')
+            for (var i=0;i<4;i++){
+                mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=null
+            }
+        }
+        function shapeColor() {//形状颜色
+            var color=new Array('#147df2','#fd850a','#4c6977','#f12821');
+            var rd=Math.floor(Math.random()*4);
+            return color[rd];
+        }
+        function createShape() {//生成形状
+            var block=new Array(4);
+            var rd=Math.floor(Math.random()*7);
+            switch(rd){
+                case 0:{
+                    block[0] = {x:0, y:4};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:0, y:5};
+                    block[3] = {x:1, y:5};
+                    break;
+                }
+                case 1:{
+                    block[0] = {x:0, y:3};
+                    block[1] = {x:0, y:4};
+                    block[2] = {x:0, y:5};
+                    block[3] = {x:0, y:6};
+                    break;
+                }
+                case 2:{
+                    block[0] = {x:0, y:5};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:1, y:5};
+                    block[3] = {x:2, y:4};
+                    break;
+                }
+                case 3:{
+                    block[0] = {x:0, y:4};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:1, y:5};
+                    block[3] = {x:2, y:5};
+                    break;
+                }
+                case 4:{
+                    block[0] = {x:0, y:4};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:1, y:5};
+                    block[3] = {x:1, y:6};
+                    break;
+                }
+                case 5:{
+                    block[0] = {x:0, y:4};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:2, y:4};
+                    block[3] = {x:2, y:5};
+                    break;
+                }
+                case 6:{
+                    block[0] = {x:0, y:5};
+                    block[1] = {x:1, y:4};
+                    block[2] = {x:1, y:5};
+                    block[3] = {x:1, y:6};
+                    break;
+                }
+            }
+            return block;
+        }
+    </script>
+</head>
+<body >
+    <div style="float: left;width: 50%;" id="mainBoard"></div>
+    <div style="float: left; width: 30%;margin: 20px;padding:50px;background-color: white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
+        <div style="text-align: center;font-size: 40px;" id="score">score</div>
+        <br><br><br><br><br><br>
+        <form action="" style="position: relative;left: 50%">
+            <input type="radio" name="rdo" id="yes" checked />
+            <input type="radio" name="rdo" id="no"/>
+            <div class="switch">
+                <label for="yes">开始</label>
+                <label for="no">暂停</label>
+                <span></span>
+            </div>
+        </form>
+        <!--输入行数 <input type="input" id="inputR"><br>-->
+        <!--输入列数 <input type="input" id="inputC"><br>-->
+        <!--<input type="button" value="确定" id="button1"><br><br>-->
+
+        <!--<input type="button" value="开始" id="button2">-->
+        <!--<input type="button" value="暂停" id="button3"><br>-->
+    </div >
+    <div style="float: right;margin: 50px;background-color: white;width:20%;padding: 50px;box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
+        <div class="toggleWrapper">
+            <h3 style="position: relative;float: left;margin-right: 20px">网格显示: </h3>
+            <input type="checkbox" id="dn" class="dn">
+            <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
+        </div>
+        <h3>选择行/列：</h3>
+        <div class="wrap" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px;">
+            <input id="example-1" name="example-1" placeholder="0 - 100" type="number" min="10" max="40" step="1" value="10" data-color="#6324B5" class="srs">
+        </div>
+        <div class="wrap" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
+            <input id="example-2" name="example-1" placeholder="0 - 100" type="number" min="10" max="40" step="1" value="10" data-color="#6324B5" class="srs">
+        </div>
+        <div >
+            <button class="btn" onclick='choiceSize()'style="height: 50px;font-weight: bold;background-color: #fd850a;color: white">
+                <span class="text">确定</span>
+            </button>
+        </div>
+    </div>
+</body>
+</html>
