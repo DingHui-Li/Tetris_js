@@ -108,7 +108,7 @@
             var tb=document.createElement('table')//新创建table
             tb.setAttribute('id','mainTb')
             mainBoard.appendChild(tb)
-           tb.style="border-collapse: collapse;border:2px solid;position: relative;margin-left:auto; margin-right:auto;color:white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
+           tb.style="border-collapse: collapse;border:2px solid;background:white;position: relative;margin-left:auto; margin-right:auto;color:gray;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
             for (var i=0;i<rows ;i++) {
                 var tr=document.createElement('tr');
                 tb.appendChild(tr);
@@ -342,7 +342,7 @@
     </script>
 </head>
 <body >
-    <div style="float: left;width: 50%;" id="mainBoard"></div>
+    <div style="float: left;width: 50%" id="mainBoard"></div>
     <div style="float: left; width: 30%;margin: 20px;padding:50px;background-color: white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
         <div style="text-align: center;font-size: 40px;" id="score">score</div>
         <br><br><br><br><br><br>
