@@ -25,7 +25,7 @@
             choiceSize();
             actShape=createShape();
             start();
-
+            changeSpeed()
         }
 
         document.onkeydown=function (e) {
@@ -63,7 +63,7 @@
         document.onkeyup=function (e) {
             if (e.keyCode===40){
                 clearInterval(timer);
-                fallingSpeed=1000;
+                fallingSpeed=document.getElementById('example-3').value;
                 moveDown();
             }
         }
@@ -72,7 +72,7 @@
                 var yes=document.getElementById('yes');
                 var no=document.getElementById('no');
                 yes.onclick=function () {
-                    fallingSpeed=800;
+                    fallingSpeed=document.getElementById('example-3').value;
                     moveDown();
                 }
                 no.onclick=function () {
@@ -95,6 +95,14 @@
             //     clearInterval(timer);
             // }
         }
+        function changeSpeed() {
+            document.getElementById('a').onclick=function () {
+                fallingSpeed=document.getElementById('example-3').value;
+                clearInterval(timer);
+                moveDown();
+            }
+
+        }
         function creteMainTb() {//创建mainTb
             allCell=new Array(rows);
             for (var i=0;i<rows;i++){
@@ -112,8 +120,6 @@
             for (var i=0;i<rows ;i++) {
                 var tr=document.createElement('tr');
                 tb.appendChild(tr);
-                tr.width='20px'
-                tr.height='20px'
                 for (var j=0;j<cols;j++) {
                     var td=document.createElement('td');
                     if (grid) td.style="border:1px solid;";
@@ -207,6 +213,7 @@
             return true;
         }
         function moveDown() {
+            document.getElementById('speed').innerHTML='当前速度：'+fallingSpeed+' ms'
                 var mainTb=document.getElementById('mainTb')
                timer = setInterval(function () {
                    if (checkBottom()){
@@ -368,6 +375,7 @@
             <input type="checkbox" id="dn" class="dn">
             <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
         </div>
+        <br><hr>
         <h3>选择行/列：</h3>
         <div class="wrap" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px;">
             <input id="example-1" name="example-1" placeholder="0 - 100" type="number" min="10" max="40" step="1" value="10" data-color="#6324B5" class="srs">
@@ -377,9 +385,15 @@
         </div>
         <div >
             <button class="btn" onclick='choiceSize()'style="height: 50px;font-weight: bold;background-color: #fd850a;color: white">
-                <span class="text">确定</span>
+                <span class="text">确定(重新开始)</span>
             </button>
         </div>
+        <br><hr >
+        <h3>调整速度：</h3>
+        <div class="wrap" id="a" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px;">
+            <input id="example-3" name="example-2" placeholder="200 - 800" type="number" min="100" max="1000" step="10" value="800" data-color="black" class="srs">
+        </div>
+        <div><h4 id="speed">当前速度：0 ms</h4></div>
     </div>
 </body>
 </html>
