@@ -126,11 +126,14 @@
                 var r=document.getElementById('example-1').value;
                 var c=document.getElementById('example-2').value;
                 rows=r;cols=c;creteMainTb();
+		        gameOver();document.getElementById('score').innerHTML=0;
+				
             }
             document.getElementById('col').onclick=function () {
                 var r=document.getElementById('example-1').value;
                 var c=document.getElementById('example-2').value;
                 rows=r;cols=c;creteMainTb();
+				 gameOver();document.getElementById('score').innerHTML=0;
             }
         }
         function eliminate() {//消除
@@ -234,14 +237,14 @@
         function gameOver() {
             var mainTb=document.getElementById('mainTb')
             clearInterval(timer);
+			 score = 0;
             for (var i = 0; i < rows; i++) {
                 for (var j = 0; j < cols; j++){
                     allCell[i][j]=0;
                     mainTb.rows[i].cells[j].style.backgroundColor=null;
-                    score = 0;
                     }
             }
-
+			
         }
         function checkBottom() {//检查下边距
             var mainTb=document.getElementById('mainTb')
