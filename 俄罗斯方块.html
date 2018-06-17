@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>俄罗斯方块</title>
     <link href="css/base.css" rel="stylesheet"><!--//滑块-->
     <link href="dist/srs.css" rel="stylesheet">
     <script src="dist/jquery.js"></script>
@@ -9,6 +10,10 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/style1.css"><!--//开始/暂停按钮-->
     <link rel="stylesheet" href="css/style2.css"><!--//开关按钮-->
+	<link rel="stylesheet" type="text/css" href="css/demo.css" />
+<link rel="stylesheet" type="text/css" href="css/ns-default.css" />
+<link rel="stylesheet" type="text/css" href="css/ns-style-bar.css" />
+<script src="js/modernizr.custom.js"></script>
     <script>
         var rows=20;//行数
         var cols=20;//列数
@@ -402,5 +407,19 @@
         </div>
         <div><h4 id="speed">当前速度：0 ms</h4></div>
     </div>
+	<script src="js/classie.js"></script>
+	<script src="js/notificationFx.js"></script>
+	<script>
+		var notification = new NotificationFx({
+			message : '<span class="icon icon-settings"></span><p style="font-size:15px" >建议使用Chrome浏览 </p>',
+			layout : 'bar',
+			effect : 'exploader',
+			type : 'notice', // notice, warning or error
+			onClose : function() {
+			bttn.disabled = false;
+			}
+		});
+		notification.show();
+	</script>
 </body>
 </html>
