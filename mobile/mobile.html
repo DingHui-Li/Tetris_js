@@ -1,108 +1,109 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="user-scalable=no">
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<title>俄罗斯方块</title>
-    <link href="css/base.css" rel="stylesheet"><!--//滑块-->
-    <link href="dist/srs.css" rel="stylesheet">
-    <script src="dist/jquery.js"></script>
-    <script src="dist/srs.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/style1.css"><!--//开始/暂停按钮-->
-    <link rel="stylesheet" href="css/style2.css"><!--//开关按钮-->
-	<link rel="stylesheet" type="text/css" href="css/demo.css" />
-<link rel="stylesheet" type="text/css" href="css/ns-default.css" />
-<link rel="stylesheet" type="text/css" href="css/ns-style-bar.css" />
-<script src="js/modernizr.custom.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/component.css" />
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
     <script>
-        var rows=20;//行数
-        var cols=20;//列数
+        var rows;
+        var cols;
         var actShape;//当前图形
         var allCell;//所有单元格的状态
         var timer;//定时器
-        var fallingSpeed=800;//下移速度
+		var normal=600//正常速度
+        var fallingSpeed=normal//下移速度
         var score=0;//分数
-        var grid=false;//网格
         var color=shapeColor();
-        var startX=0;
-        var startY=0;
-        var endX=0;
-        var endY=0;
+		var isRun=false
         window.onload=function () {
+		rows=parseInt(document.getElementById("mainBoard").offsetHeight/25);//行数
+        cols=parseInt(document.getElementById("mainBoard").offsetWidth/25);//列数
             document.getElementById('score').innerHTML=score;
             creteMainTb()
-            choiceSize();
             actShape=createShape();
-            start();
-            changeSpeed()
+			  document.getElementById('main').addEventListener('touchmove',slide )
+                document.getElementById('main').addEventListener('touchstart',function (e) {
+                    var touch = event.targetTouches[0];
+                    startX =touch.pageX,
+                    startY = touch.pageY;
+                })
+			
+				document.getElementById('main').addEventListener('touchend',function(e){
+				if(isRun){
+						clearInterval(timer);
+						fallingSpeed=normal;
+						moveDown();
+						}
+				})
+				document.getElementById('mainBoard').onclick=function(){
+				if(isRun){
+						rotate();
+						//clearInterval(timer);
+						//fallingSpeed=normal;
+						//moveDown();	
+						}
+				}
+				document.getElementById('topBar').onclick=function(){
+					var sc=	document.getElementById('score');
+					var tb=	document.getElementById('topBar');
+					if(isRun){
+						isRun=false;clearInterval(timer)
+						tb.style.background='red';
+						sc.style.fontSize='1.5em'
+						sc.style.color='white'
+						sc.innerHTML='暂停'
+					}
+					else {
+						isRun=true;
+						tb.style.background='white';
+						sc.style.color='black'
+						sc.style.fontSize='2em'
+						sc.innerHTML=score
+						moveDown()
+					}
+				}
         }
-        document.onkeydown=function (e) {
-            clearInterval(timer);
-            if (e.keyCode===37){//左键
-                if (checkLeft()) {
-                    wipe();
-                    for (var i=0;i<4;i++){
-                        actShape[i].y--;
+		 function slide(e){
+			if(isRun){
+			 //clearInterval(timer);
+			    e.preventDefault();
+                var touch = event.targetTouches[0];
+                endX =touch.pageX,
+                endY = touch.pageY;
+                var X = endX - startX
+                var Y = endY - startY;
+                if (Math.abs(X) > Math.abs(Y) && X > 0&& Math.abs(X)>25) {//右滑
+                    if (checkRight()) {
+                        wipe();
+                        for (var i = 0; i < 4; i++) {
+                            actShape[i].y++;
+                        }
+                        draw();
                     }
-                    draw();
+					startX=endX;startY=endY;
+                   // moveDown();
+					
                 }
-                moveDown();
-            }
-            else if (e.keyCode===39){//右键
-                if (checkRight() ) {
-                    wipe();
-                    for (var i=0;i<4;i++){
-                        actShape[i].y++;
+                else if (Math.abs(X) > Math.abs(Y) && X < 0&& Math.abs(X)>25) {//左滑
+                    if (checkLeft()) {
+                        wipe();
+                        for (var i = 0; i < 4; i++) {
+                            actShape[i].y--;
+                        }
+                        draw();
                     }
-                    draw();
+					startX=endX;startY=endY;
+                   // moveDown();
                 }
-                moveDown();
-            }
-            else if (e.keyCode===38) {//上键
-                rotate();
-                moveDown();
-            }
-            else if (e.keyCode===40){//下键
-                fallingSpeed=50;
-                moveDown();
-            }
-
-        }
-        document.onkeyup=function (e) {
-            if (e.keyCode===40){
-                clearInterval(timer);
-                fallingSpeed=document.getElementById('example-3').value;
-                moveDown();
-            }
-        }
-        function start() {
-                var yes=document.getElementById('yes');
-                var no=document.getElementById('no');
-                yes.onclick=function () {
-                    fallingSpeed=document.getElementById('example-3').value;
-                    moveDown();
+                else if (Math.abs(Y) > Math.abs(X) && Y > 0&& Math.abs(Y)>40) {//下滑
+				    clearInterval(timer);
+					startX=endX;startY=endY;
+                    fallingSpeed = 2;
+                    moveDown();	
                 }
-                no.onclick=function () {
-                    clearInterval(timer);
-                }
-                var check=document.getElementById('dn');
-                check.onclick=function () {
-                    if (check.checked){
-                        grid = true;gameOver();document.getElementById('score').innerHTML=0;
-						creteMainTb();
-                    }else {
-                        grid = false;gameOver();document.getElementById('score').innerHTML=0;
-						creteMainTb();
-                    }
-                }
-        }
-        function changeSpeed() {
-            document.getElementById('a').onclick=function () {
-                fallingSpeed=document.getElementById('example-3').value;
-                clearInterval(timer);
-                moveDown();
-            }
-
+			}
         }
         function creteMainTb() {//创建mainTb
             allCell=new Array(rows);
@@ -117,32 +118,15 @@
             var tb=document.createElement('table')//新创建table
             tb.setAttribute('id','mainTb')
             mainBoard.appendChild(tb)
-           tb.style="border-collapse: collapse;border:2px solid;background:white;position: relative;margin-left:auto; margin-right:auto;color:gray;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
+           tb.style="border-collapse: collapse;position: relative;margin-left:auto； margin-right:auto;color:black;width:100%;height:100%;background:white;table-layout:fixed;margin-bottom:0px"
             for (var i=0;i<rows ;i++) {
                 var tr=document.createElement('tr');
                 tb.appendChild(tr);
                 for (var j=0;j<cols;j++) {
                     var td=document.createElement('td');
-                    if (grid) td.style="border:1px solid;";
-                    td.width='20px'
-                    td.height='20px'
+                    td.style="border:1px solid ";
                     tr.appendChild(td);
                 }
-            }
-        }
-        function choiceSize() {//选择mainTb行数和列数
-            document.getElementById('row').onclick=function () {
-                var r=document.getElementById('example-1').value;
-                var c=document.getElementById('example-2').value;
-                rows=r;cols=c;creteMainTb();
-		        gameOver();document.getElementById('score').innerHTML=0;
-				
-            }
-            document.getElementById('col').onclick=function () {
-                var r=document.getElementById('example-1').value;
-                var c=document.getElementById('example-2').value;
-                rows=r;cols=c;creteMainTb();
-				 gameOver();document.getElementById('score').innerHTML=0;
             }
         }
         function eliminate() {//消除
@@ -163,6 +147,7 @@
            }
            if (lines.length>0) {
                score += lines.length * 5;
+			   if(score%50===0&&normal>100) normal-=50
                document.getElementById('score').innerHTML = score;
                for (var k = 0; k < lines.length; k++) {//下移
                    for (var i = lines[k]; i >= 0; i--) {
@@ -218,9 +203,8 @@
             return true;
         }
         function moveDown() {
-            document.getElementById('speed').innerHTML='当前速度：'+fallingSpeed+' ms'
                 var mainTb=document.getElementById('mainTb')
-               timer = setInterval(function () {
+                timer = setInterval(function () {
                    if (checkBottom()){
                        wipe();
                        for (var j=0;j<actShape.length;j++){
@@ -229,21 +213,24 @@
                        draw();
                    }
                    else  {
+						clearInterval(timer)
+					   moveDown();
                        for (var j=0;j<actShape.length;j++) {
                             allCell[actShape[j].x][actShape[j].y]=1;
                        }
                        eliminate();
                        actShape=createShape();
                        color=shapeColor();
-                       clearInterval(timer);
-                       fallingSpeed=document.getElementById('example-3').value;
-                       moveDown()
+					   /*var main= document.getElementById('main')//手动触发事件
+					  var event= document.createEvent('Events')
+					 event.initEvent('touchend',true,true)
+					 main.dispatchEvent(event)*/
+					   
                        for (var i=0;i<4;i++){
                            if (allCell[actShape[i].x][actShape[i].y]===1) {
                                gameOver(); alert('game over'); break;
                            }
                        }
-
                    }
                 },fallingSpeed)
         }
@@ -357,68 +344,36 @@
         }
     </script>
 </head>
-<body id="body" style="background-color: #00a2d3">
-    <div style="float: left;width: 1000px" id="mainBoard"></div>
-    <div style=" width: 400px;margin: 20px;padding:50px;background-color: white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
-        <div style="text-align: center;font-size: 40px;" id="score">score</div>
-        <br><br><br><br><br><br>
-        <table style="position:relative;margin-left: auto;margin-right: auto">
-            <tr>
-                <td style="width:10rem">
-                    <div style="position: relative;margin-left: 5rem">
-                        <form action=""style="position:relative;" >
-                        <input type="radio" name="rdo" id="yes"  />
-                        <input type="radio" name="rdo" id="no" checked/>
-                        <div class="switch" style="width: 10rem;height: 4rem;">
-                            <label for="yes"style="font-size: 3rem;font-weight:bold;color: white">开始</label>
-                            <label for="no" style="font-size: 3rem;font-weight:bold;color: white">暂停</label>
-                            <span></span>
-                        </div>
-                    </form>
-                    </div>
-                </td>
-                <td style="width:10rem">
-                    <div style="position: relative;margin-left: 5rem">
-                        <button class="btn"onclick="gameOver()" style="width: 10rem;font-weight:bold;height: 4rem;font-size:3rem;background-color: #fd850a;color: white">
-                            结束
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div >
-    <div style="margin: 50px;background-color: white;width:400px;padding: 50px;box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
-        <div class="toggleWrapper">
-            <h3 style="position: relative;float: left;margin-right: 20px">网格显示: </h3>
-            <input type="checkbox" id="dn" class="dn">
-            <label for="dn" class="toggle"><span class="toggle__handler"></span></label>
-        </div>
-        <br><hr>
-        <h3>选择行/列：</h3>
-        <div class="wrap" id="row" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px;">
-            <input id="example-1" name="example-1" placeholder="0 - 100" type="number" min="10" max="40" step="1" value="20" data-color="#6324B5" class="srs">
-        </div>
-        <div class="wrap" id="col" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
-            <input id="example-2" name="example-1" placeholder="0 - 100" type="number" min="10" max="40" step="1" value="20" data-color="#6324B5" class="srs">
-        </div>
-
-        <br><hr >
-        <h3>调整速度：</h3>
-        <div class="wrap" id="a" style="box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px;">
-            <input id="example-3" name="example-2" placeholder="200 - 800" type="number" min="100" max="1000" step="10" value="800" data-color="black" class="srs">
-        </div>
-        <div><h4 id="speed">当前速度：0 ms</h4></div>
-    </div>
-	<script src="js/classie.js"></script>
-	<script src="js/notificationFx.js"></script>
-	<script>
-		var notification = new NotificationFx({
-			message : '<span class="icon icon-settings"></span><p style="font-size:15px" >建议使用Chrome浏览 </p>',
-			layout : 'bar',
-			effect : 'exploader',
-			type : 'notice', // notice, warning or error
-		});
-		notification.show();
-	</script>
+<body style='background-color:#00a2d3'>
+	<div style='width:100%;height:97vh;position: fixed;top:0;left: 0;' id='main'>
+		<div style='height:12%;background-color:red'id='topBar'>
+			<div style='position;relative;float:left'><img src='icon/电脑.png'style='width:2em;height:2em;margin-top:2em'onclick=window.location.href='../俄罗斯方块.html'></img></div>
+			<div id='score' style='position:relative;height:100%;float:left;width:20%;font-size:2em;left:40%;text-align:center;background-color:none;line-height:5.5rem;font-weight:bold'>
+				
+			</div>
+			<div style='position:relative;float:right;top:15%'>
+				<button class="md-trigger" data-modal="modal-9" ><img src='icon/提示.png'style='width:2em;height:2em;'></img></button>
+			</div>
+		</div>
+		<div id="mainBoard" style='height:80%;width:100%;position:absolute;box-shadow: -1px 1px 8px rgba(0, 0, 0, 0.4)'></div>
+	</div>
+	
+	<div class="md-modal md-effect-9" id="modal-9">
+			<div class="md-content">
+				<div style='text-align:center;color:#147df2'>
+					<p ><img src='icon/左滑.png'style='margin-right:15px'></img>左滑：向左移动</p>
+					<p><img src='icon/右滑.png'style='margin-right:15px'></img>右滑：向右移动</p>
+					<p ><img src='icon/下滑.png'style='margin-right:15px'></img>下滑：加速下降</p>
+					<p ><img src='icon/点击.png'style='margin-right:15px'></img>点击：变换形状</p>
+					<p >tips:点击记分板以开始/暂停</p>
+				</div>
+				<div>
+					<button class="md-close" style='background-color:#147df2'>Close me!</button>
+				</div>
+			</div>
+		</div>
+		<div class="md-overlay"></div>
+		<script src="js/classie.js"></script>
+		<script src="js/modalEffects.js"></script>
 </body>
 </html>

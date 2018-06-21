@@ -29,17 +29,12 @@ body {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--color-secondary-500);
-  font-family: var(--font-primary);
 }
 
 .btn {
   position: relative;
   display: inline-block;
   margin: 0;
-  padding: 1.5rem 4.5rem;
   background: white;
   color: black;
   line-height: normal;
