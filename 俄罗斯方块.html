@@ -35,6 +35,53 @@
             actShape=createShape();
             start();
             changeSpeed()
+
+                document.getElementById('body').addEventListener('touchmove',slide )
+                document.getElementById('body').addEventListener('touchstart',function (e) {
+                    var touch = event.targetTouches[0];
+                    startX =touch.pageX,
+                        startY = touch.pageY;
+                })
+        }
+
+        function slide(e){
+            clearInterval(timer);
+                var touch = event.targetTouches[0];
+                endX =touch.pageX,
+                endY = touch.pageY;
+                var X = endX - startX
+                var Y = endY - startY;
+            if ( document.getElementById('yes').checked) {
+                if (Math.abs(X) > Math.abs(Y) && X > 0) {//右滑
+                    if (checkRight()) {
+                        wipe();
+                        for (var i = 0; i < 4; i++) {
+                            actShape[i].y++;
+                        }
+                        draw();
+                    }
+                    moveDown();
+                }
+                else if (Math.abs(X) > Math.abs(Y) && X < 0) {//左滑
+                    if (checkLeft()) {
+                        wipe();
+                        for (var i = 0; i < 4; i++) {
+                            actShape[i].y--;
+                        }
+                        draw();
+                    }
+                    moveDown();
+                }
+                else if (Math.abs(Y) > Math.abs(X) && Y > 0) {//下滑
+                    fallingSpeed = 50;
+                    moveDown();
+
+                }
+                else if (Math.abs(Y) > Math.abs(X) && Y < 0) {//上滑
+                    rotate();
+                    moveDown();
+                }
+            }
         }
         document.onkeydown=function (e) {
             clearInterval(timer);
@@ -357,7 +404,8 @@
         }
     </script>
 </head>
-<body id="body" style="background-color: #00a2d3">
+<body id="body" >
+	<img src='mobile/icon/手机.png'onclick="window.location.href='mobile/mobile.html'"></img>
     <div style="float: left;width: 1000px" id="mainBoard"></div>
     <div style=" width: 400px;margin: 20px;padding:50px;background-color: white;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);border-radius: 10px">
         <div style="text-align: center;font-size: 40px;" id="score">score</div>
