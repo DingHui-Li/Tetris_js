@@ -258,7 +258,8 @@
         }
         function checkBottom() {//检查下边距
             var mainTb=document.getElementById('mainTb')
-            for (var i=0;i<4;i++ ) {
+			if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y)return true;
+		     for (var i=0;i<4;i++ ) {
                 if (actShape[i].x>=mainTb.rows.length-1) return false;
                 if (allCell[actShape[i].x+1][actShape[i].y]===1)return false;
             }
@@ -281,15 +282,23 @@
         }
         function draw() {//绘制图形
             var mainTb=document.getElementById('mainTb')
-            for (var i=0;i<4;i++) {
-                mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=color;
-            }
+			if(actShape[0].x>=rows) {
+				 for (var i = 0; i < rows; i++) {//重绘
+                   for (var j = 0; j < cols; j++) {
+                       if (allCell[i][j] == 1) mainTb.rows[i].cells[j].style.backgroundColor = color;
+                   }
+               }
+				actShape=createShape();return false;
+			}
+			for (var i=0;i<4;i++) {
+				mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=color;
+			}
         }
         function wipe() {//擦除图形
             var mainTb=document.getElementById('mainTb')
-            for (var i=0;i<4;i++){
-                mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=null
-            }
+			for (var i=0;i<4;i++){
+				mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=null
+			}  
         }
         function shapeColor() {//形状颜色
             var color=new Array('#4578e7','#e23c3c','#eeb144','#409d4e');
@@ -298,7 +307,7 @@
         }
         function createShape() {//生成形状
             var block=new Array(4);
-            var rd=Math.floor(Math.random()*7);
+            var rd=Math.floor(Math.random()*8);
             switch(rd){
                 case 0:{
                     block[0] = {x:0, y:4};
@@ -347,6 +356,13 @@
                     block[1] = {x:1, y:4};
                     block[2] = {x:1, y:5};
                     block[3] = {x:1, y:6};
+                    break;
+                }
+				case 7:{
+                    block[0] = {x:0, y:5};
+					block[1] = {x:0, y:5};
+					block[2] = {x:0, y:5};
+					block[3] = {x:0, y:5};
                     break;
                 }
             }
