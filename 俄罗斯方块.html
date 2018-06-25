@@ -23,11 +23,7 @@
         var fallingSpeed=800;//下移速度
         var score=0;//分数
         var grid=false;//网格
-        var color=shapeColor();
-        var startX=0;
-        var startY=0;
-        var endX=0;
-        var endY=0;
+        var color=shapeColor();//方块颜色
         window.onload=function () {
             document.getElementById('score').innerHTML=score;
             creteMainTb()
@@ -35,54 +31,8 @@
             actShape=createShape();
             start();
             changeSpeed()
-
-                document.getElementById('body').addEventListener('touchmove',slide )
-                document.getElementById('body').addEventListener('touchstart',function (e) {
-                    var touch = event.targetTouches[0];
-                    startX =touch.pageX,
-                        startY = touch.pageY;
-                })
         }
 
-        function slide(e){
-            clearInterval(timer);
-                var touch = event.targetTouches[0];
-                endX =touch.pageX,
-                endY = touch.pageY;
-                var X = endX - startX
-                var Y = endY - startY;
-            if ( document.getElementById('yes').checked) {
-                if (Math.abs(X) > Math.abs(Y) && X > 0) {//右滑
-                    if (checkRight()) {
-                        wipe();
-                        for (var i = 0; i < 4; i++) {
-                            actShape[i].y++;
-                        }
-                        draw();
-                    }
-                    moveDown();
-                }
-                else if (Math.abs(X) > Math.abs(Y) && X < 0) {//左滑
-                    if (checkLeft()) {
-                        wipe();
-                        for (var i = 0; i < 4; i++) {
-                            actShape[i].y--;
-                        }
-                        draw();
-                    }
-                    moveDown();
-                }
-                else if (Math.abs(Y) > Math.abs(X) && Y > 0) {//下滑
-                    fallingSpeed = 50;
-                    moveDown();
-
-                }
-                else if (Math.abs(Y) > Math.abs(X) && Y < 0) {//上滑
-                    rotate();
-                    moveDown();
-                }
-            }
-        }
         document.onkeydown=function (e) {
             clearInterval(timer);
             if (e.keyCode===37){//左键
@@ -164,7 +114,7 @@
             var tb=document.createElement('table')//新创建table
             tb.setAttribute('id','mainTb')
             mainBoard.appendChild(tb)
-           tb.style="border-collapse: collapse;border:2px solid;background:white;position: relative;margin-left:auto; margin-right:auto;color:gray;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
+           tb.style="border-collapse: collapse;background:white;position: relative;margin-left:auto; margin-right:auto;color:gray;box-shadow:-1px 1px 8px rgba(0, 0, 0, 0.4);"
             for (var i=0;i<rows ;i++) {
                 var tr=document.createElement('tr');
                 tb.appendChild(tr);
