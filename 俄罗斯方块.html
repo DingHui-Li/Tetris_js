@@ -17,7 +17,7 @@
     <script>
         var rows=20;//行数
         var cols=20;//列数
-        var actShape;//当前图形
+        var actShape;//当前方块
         var allCell;//所有单元格的状态
         var timer;//定时器
         var fallingSpeed=800;//下移速度
@@ -106,6 +106,11 @@
             for (var i=0;i<rows;i++){
                 allCell[i]=new Array(cols);
             }
+			for(var i=0;i<rows;i++){
+				for(var j=0;j<cols;j++)(
+					allCell[i][j]={state:0,color:'null'}
+				)
+			}
             var mainBoard=document.getElementById('mainBoard')
             var tb =document.getElementById('mainTb')//若mainTb存在则删除
             if (tb) {
@@ -149,12 +154,13 @@
             for (var i=0;i<rows;i++){
                 flag = true;
                 for(var j=0;j<cols;j++){
-                    if (allCell[i][j]!=1) flag = false;
+                    if (allCell[i][j].state!=1) flag = false;
                 }
                 if (flag) {
                     lines.push(i);
                     for(var j=0;j<cols;j++){
-                        allCell[i][j]=0;
+                        allCell[i][j].state=0;
+						allCell[i][j].color='null'
                     }
                 }
            }
@@ -164,10 +170,12 @@
                for (var k = 0; k < lines.length; k++) {//下移
                    for (var i = lines[k]; i >= 0; i--) {
                        for (var j = 0; j < cols; j++) {
-                           if (allCell[i][j] == 1) {
+                           if (allCell[i][j].state == 1) {
                                if (i < rows) {
-                                   allCell[i][j] = 0;
-                                   allCell[i + 1][j] = 1;
+                                   allCell[i][j].state = 0;
+								   allCell[i + 1][j].color= allCell[i][j].color;
+								    allCell[i][j].color='null'
+                                   allCell[i + 1][j].state = 1;
                                }
                            }
                        }
@@ -181,7 +189,7 @@
                }
                for (var i = 0; i < rows; i++) {//重绘
                    for (var j = 0; j < cols; j++) {
-                       if (allCell[i][j] == 1) mainTb.rows[i].cells[j].style.backgroundColor = color;
+                       if (allCell[i][j].state == 1) mainTb.rows[i].cells[j].style.backgroundColor = allCell[i][j].color;
                    }
                }
            }
@@ -227,7 +235,8 @@
                    }
                    else  {
                        for (var j=0;j<actShape.length;j++) {
-                            allCell[actShape[j].x][actShape[j].y]=1;
+                            allCell[actShape[j].x][actShape[j].y].state=1;
+							allCell[actShape[j].x][actShape[j].y].color=color;
                        }
                        eliminate();
                        actShape=createShape();
@@ -236,7 +245,7 @@
                        fallingSpeed=document.getElementById('example-3').value;
                        moveDown()
                        for (var i=0;i<4;i++){
-                           if (allCell[actShape[i].x][actShape[i].y]===1) {
+                           if (allCell[actShape[i].x][actShape[i].y].state==1) {
                                gameOver(); alert('game over'); break;
                            }
                        }
@@ -250,7 +259,8 @@
 			 score = 0;
             for (var i = 0; i < rows; i++) {
                 for (var j = 0; j < cols; j++){
-                    allCell[i][j]=0;
+                    allCell[i][j].state=0;
+					allCell[i][j].color='null';
                     mainTb.rows[i].cells[j].style.backgroundColor=null;
                     }
             }
@@ -258,17 +268,22 @@
         }
         function checkBottom() {//检查下边距
             var mainTb=document.getElementById('mainTb')
-			if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y)return true;
-		     for (var i=0;i<4;i++ ) {
+			if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y){//若是单点方块
+				 if (actShape[0].x>=mainTb.rows.length-1) return false;
+			}
+			else{
+				for (var i=0;i<4;i++ ) {
                 if (actShape[i].x>=mainTb.rows.length-1) return false;
-                if (allCell[actShape[i].x+1][actShape[i].y]===1)return false;
-            }
+                if (allCell[actShape[i].x+1][actShape[i].y].state===1)return false;
+				}
+			}
+		     
             return true;
         }
         function checkLeft() {//检查左边距
             for (var i=0;i<4;i++ ) {
                 if (actShape[i].y<=0) return false;
-                if (allCell[actShape[i].x][actShape[i].y-1]===1)return false;
+                if (allCell[actShape[i].x][actShape[i].y-1].state===1)return false;
             }
             return true;
         }
@@ -276,36 +291,31 @@
             var mainTb=document.getElementById('mainTb');
             for (var i=0;i<4;i++ ) {
                 if (actShape[i].y+1>=mainTb.rows[0].cells.length) return false;
-                if (allCell[actShape[i].x][actShape[i].y+1]===1)return false;
+                if (allCell[actShape[i].x][actShape[i].y+1].state===1)return false;
             }
             return true;
         }
-        function draw() {//绘制图形
+        function draw() {//绘制方块
             var mainTb=document.getElementById('mainTb')
-			if(actShape[0].x>=rows) {
-				 for (var i = 0; i < rows; i++) {//重绘
-                   for (var j = 0; j < cols; j++) {
-                       if (allCell[i][j] == 1) mainTb.rows[i].cells[j].style.backgroundColor = color;
-                   }
-               }
-				actShape=createShape();return false;
-			}
 			for (var i=0;i<4;i++) {
 				mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=color;
+				if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y){
+					mainTb.rows[actShape[i].x-1].cells[actShape[i].y].style.backgroundColor=allCell[actShape[i].x-1][actShape[i].y].color;
+				}
 			}
         }
-        function wipe() {//擦除图形
+        function wipe() {//擦除方块
             var mainTb=document.getElementById('mainTb')
 			for (var i=0;i<4;i++){
 				mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=null
 			}  
         }
-        function shapeColor() {//形状颜色
+        function shapeColor() {//方块颜色
             var color=new Array('#4578e7','#e23c3c','#eeb144','#409d4e');
             var rd=Math.floor(Math.random()*4);
             return color[rd];
         }
-        function createShape() {//生成形状
+        function createShape() {//生成方块
             var block=new Array(4);
             var rd=Math.floor(Math.random()*8);
             switch(rd){
