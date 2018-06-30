@@ -269,7 +269,22 @@
         function checkBottom() {//检查下边距
             var mainTb=document.getElementById('mainTb')
 			if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y){//若是单点方块
-				 if (actShape[0].x>=mainTb.rows.length-1) return false;
+				var　top=-1;var col=actShape[0].y;var bottom=-1;//穿过其他方块到达空白处
+				for(var i=0;i<mainTb.rows.length;i++){
+					if(allCell[i][col].state==1){
+						top=i;break;
+					}
+				}
+				for(var i=mainTb.rows.length-1;i>top;i--){
+					if(allCell[i][col].state==0){
+						bottom=i;break;
+					}
+				}
+				if(bottom!=-1){
+					if(actShape[0].x<bottom) return true;
+					else return false;
+				}
+				else if(actShape[0].x>=mainTb.rows.length-1) return false;
 			}
 			else{
 				for (var i=0;i<4;i++ ) {
@@ -299,7 +314,7 @@
             var mainTb=document.getElementById('mainTb')
 			for (var i=0;i<4;i++) {
 				mainTb.rows[actShape[i].x].cells[actShape[i].y].style.backgroundColor=color;
-				if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y){
+				if(actShape[0].x==actShape[1].x&&actShape[0].y==actShape[1].y){//若是单点方块
 					mainTb.rows[actShape[i].x-1].cells[actShape[i].y].style.backgroundColor=allCell[actShape[i].x-1][actShape[i].y].color;
 				}
 			}
